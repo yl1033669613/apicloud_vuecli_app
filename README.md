@@ -1,4 +1,19 @@
-# apicloud_vuecli_example
+# APICloud + VueCLI3 = APP
+
+
+## 简介
+
+APICloud+VueCLI3 完美结合的模块化开发框架，快速构建apicloud APP
+
+使用rem适配移动端各种设备
+
+window和frame以以多页面的形式编译最后生成`.html`文件
+
+更多页面调试方式，助力快速开发APICloud 应用
+
+common.js 封装了一些针对apicloud app的方法，包括ajax、图片缓存、窗口打开关闭、模块使用等(具体请参考example)
+
+项目初始包含登录逻辑，以及初始页面构成（普通页面， 特殊页面），节约开发时间
 
 ## 目录
 
@@ -27,20 +42,6 @@
     └─scss // 样式
 ```
 
-## 简介
-
-APICloud+VueCLI3 完美结合的模块化开发框架，快速构建apicloud APP
-
-使用rem适配移动端各种设备
-
-window和frame以以多页面的形式编译最后生成`.html`文件
-
-更多页面调试方式，助力快速开发APICloud 应用
-
-common.js 封装了一些针对apicloud app的方法，包括ajax、图片缓存、窗口打开关闭、模块使用等(具体请参考example)
-
-项目初始包含登录逻辑，以及初始页面构成（普通页面， 特殊页面），节约开发时间
-
 ## 技术栈
 
 apicloud、apicloud模块、vuejs 2.x、VueCLI 3.x、webPark 4、Babel、scss(css预编译)、nodejs、npm
@@ -55,23 +56,23 @@ apicloud、apicloud模块、vuejs 2.x、VueCLI 3.x、webPark 4、Babel、scss(cs
 
 4. `npm install` （安装依赖）
 
-5. `npm run serve` （运行开发模式同样会输出编译代码到dist）
+5. `npm run serve` （运行项目前请确保全局安装了`@vue/cli`。如果没有请先 `npm install -g @vue/cli`）
 
     可以在浏览器中调试（模块，app接口除外）
 
     Local: `http://localhost:8080/your_pages.html`
 
-    Network: `http://192.168.0.1:8080/your_pages.html`
+    Network: `http://your_IP:8080/your_pages.html`
 
 6. 同步手机
 
-    首先 `npm run wifi-start` 初始wifi连接
+    首先 `npm run wifi-start` 初始wifi连接，初始成功后可以在自定义loader的wifi同步配置里输入`ip`和`端口号（默认10915）`进行连接
 
-    `npm run wifi-sync` wifi同步手机
+    `npm run wifi-sync` 命令操作 wifi同步手机
 
-    `npm run wifi-log` wifi同步输出log信息。
+    `npm run wifi-log` 打开log输出，可以方便查看app运行时的报错和log
 
-    开发模式下仍然编译代码到dist，所以也可以用APICloud Studio 连接手机同步
+    开发模式下仍然编译代码到dist，所以也可以用 `APICloud Studio` 连接手机同步代码
 
 7. `npm run build` 输出编译代码到dist将编译代码上传APICloud，即可打包编译APICloud APP
 
@@ -130,4 +131,4 @@ apicloud、apicloud模块、vuejs 2.x、VueCLI 3.x、webPark 4、Babel、scss(cs
 
 ## LICENSE
 
-[MIT](https://github.com/yl1033669613/apicloud_vuecli_example/blob/master/LICENSE)
+[MIT](https://github.com/yl1033669613/apicloud_vuecli_app/blob/master/LICENSE)
