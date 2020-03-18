@@ -142,17 +142,26 @@ export default function () {
 				h: 0
 			}
 			window.addEventListener('resize', () => {
+				let headerH = 0, footerH = 0
+				let headerEle = winDoc.querySelector('header')
+				let footerEle = winDoc.querySelector('#footer')
+				if (headerEle) {
+					headerH = headerEle.offsetHeight
+				}
+				if (footerEle) {
+					footerH = footerEle.offsetHeight
+				}
 				switch (type) {
 					case 0:
-						rect.y = winDoc.querySelector('header').offsetHeight
-						rect.h = api.winHeight - winDoc.querySelector('header').offsetHeight - (winDoc.querySelector('#footer') ? winDoc.querySelector('#footer').offsetHeight : 0)
+						rect.y = headerH
+						rect.h = api.winHeight - headerH - footerH
 						break
 					case 1:
 						rect.h = api.winHeight
 						break
 					case 2:
-						rect.y = winDoc.querySelector('header').offsetHeight
-						rect.h = api.winHeight - winDoc.querySelector('header').offsetHeight
+						rect.y = headerH
+						rect.h = api.winHeight - headerH
 						break
 				}
 				if (type == 0) {
@@ -167,32 +176,6 @@ export default function () {
 					})
 				}
 			})
-		},
-		/**
-		 * 如果为ios系统在键盘弹出时，将绝对定位底部元素变为无定位元素， 对于ios的妥协办法，防止绝对定位元素在ios上的异常表现 可在$apiReady内统一调用  也可以分开调用
-		 * @param {String} eleSelector 元素选择器
-		 * @param {String} height 固定在底部的元素高度 css高度 需要带单位 例如'10px','-1.1rem'等 取负值
-		 */
-		fixIosBottomViewWhenKeyBoardShow(eleSelector, height) {
-			let currEle = winDoc.querySelector(eleSelector)
-			if (api.systemType === 'ios' && currEle) {
-				api.addEventListener({
-					name: 'keyboardshow'
-				}, (ret, err) => {
-					// 判断内容高度大于frame窗口高度
-					if (winDoc.querySelector('body').offsetHeight > api.frameHeight) {
-						currEle.style.position = 'static'
-						// 需要统一的底部绝对定位元素高度
-						currEle.style.marginTop = height
-					}
-				})
-				api.addEventListener({
-					name: 'keyboardhide'
-				}, (ret, err) => {
-					currEle.style.position = 'fixed'
-					currEle.style.marginTop = '0'
-				})
-			}
 		},
 		/**
 		 * 打开新窗口
@@ -296,7 +279,7 @@ export default function () {
 			this.resizeFrame(name, 1)
 		},
 		/**
-		 * 操作系统返回时，先检查是否有frame弹窗并关闭之后再关闭页面 请参考page_header.html
+		 * 操作系统返回时（需在window页面监听keyback事件），先检查是否有frame弹窗并关闭之后再关闭页面 请参考page_header.html
 		 */
 		keyBackToClosePop() {
 			const frames = api.frames()
@@ -581,131 +564,6 @@ export default function () {
 			}
 		},
 		/**
-		 * 价格格式化 10000 => 10,000
-		 * @param {String} price 数字
-		 * @param {Boolean} hasW 是否需要 *10000
-		 */
-		priceFormate(price, hasW) {
-			let l
-			let t = ""
-			let d = ""
-			if (price === 0) {
-				return 0
-			}
-			if (!price) {
-				return ""
-			}
-			if (price < 1) {
-				return price
-			}
-			if (hasW) {
-				l = (parseInt(this.accMul(price, 10000)) + "").split("").reverse()
-			} else {
-				let strArr = (parseFloat(price) + "").split(".")
-				l = strArr[0].split("").reverse()
-				d = strArr[1] || ''
-			}
-			for (let i = 0; i < l.length; i++) {
-				t += l[i] + ((i + 1) % 3 == 0 && (i + 1) != l.length ? "," : "")
-			}
-			return t.split("").reverse().join("") + (d ? ("." + d) : "")
-		},
-		/**
-		 ** 加法函数，用来得到精确的加法结果
-		 ** 说明：javascript的加法结果会有误差，在两个浮点数相加的时候会比较明显。这个函数返回较为精确的加法结果。
-		 ** 调用：accAdd(arg1,arg2)
-		 ** 返回值：arg1加上arg2的精确结果
-		 **/
-		accAdd(arg1, arg2) {
-			let r1, r2, m, c
-			try {
-				r1 = arg1.toString().split(".")[1].length
-			} catch (e) {
-				r1 = 0
-			}
-			try {
-				r2 = arg2.toString().split(".")[1].length
-			} catch (e) {
-				r2 = 0
-			}
-			c = Math.abs(r1 - r2)
-			m = Math.pow(10, Math.max(r1, r2))
-			if (c > 0) {
-				let cm = Math.pow(10, c)
-				if (r1 > r2) {
-					arg1 = Number(arg1.toString().replace(".", ""))
-					arg2 = Number(arg2.toString().replace(".", "")) * cm
-				} else {
-					arg1 = Number(arg1.toString().replace(".", "")) * cm
-					arg2 = Number(arg2.toString().replace(".", ""))
-				}
-			} else {
-				arg1 = Number(arg1.toString().replace(".", ""))
-				arg2 = Number(arg2.toString().replace(".", ""))
-			}
-			return (arg1 + arg2) / m
-		},
-		/**
-		 ** 减法函数，用来得到精确的减法结果
-		 ** 说明：javascript的减法结果会有误差，在两个浮点数相减的时候会比较明显。这个函数返回较为精确的减法结果。
-		 ** 调用：accSub(arg1,arg2)
-		 ** 返回值：arg1加上arg2的精确结果
-		 **/
-		accSub(arg1, arg2) {
-			let r1, r2, m, n
-			try {
-				r1 = arg1.toString().split(".")[1].length
-			} catch (e) {
-				r1 = 0
-			}
-			try {
-				r2 = arg2.toString().split(".")[1].length
-			} catch (e) {
-				r2 = 0
-			}
-			m = Math.pow(10, Math.max(r1, r2)) //last modify by deeka //动态控制精度长度
-			n = (r1 >= r2) ? r1 : r2
-			return ((arg1 * m - arg2 * m) / m).toFixed(n)
-		},
-		/**
-		 ** 乘法函数，用来得到精确的乘法结果
-		 ** 说明：javascript的乘法结果会有误差，在两个浮点数相乘的时候会比较明显。这个函数返回较为精确的乘法结果。
-		 ** 调用：accMul(arg1,arg2)
-		 ** 返回值：arg1乘以 arg2的精确结果
-		 **/
-		accMul(arg1, arg2) {
-			let m = 0
-			let s1 = arg1.toString()
-			let s2 = arg2.toString()
-			try {
-				m += s1.split(".")[1].length
-			} catch (e) { }
-			try {
-				m += s2.split(".")[1].length
-			} catch (e) { }
-			return Number(s1.replace(".", "")) * Number(s2.replace(".", "")) / Math.pow(10, m)
-		},
-		/**
-		 ** 除法函数，用来得到精确的除法结果
-		 ** 说明：javascript的除法结果会有误差，在两个浮点数相除的时候会比较明显。这个函数返回较为精确的除法结果。
-		 ** 调用：accDiv(arg1,arg2)
-		 ** 返回值：arg1除以arg2的精确结果
-		 **/
-		accDiv(arg1, arg2) {
-			let t1 = 0
-			let t2 = 0
-			let r1, r2
-			try {
-				t1 = arg1.toString().split(".")[1].length
-			} catch (e) { }
-			try {
-				t2 = arg2.toString().split(".")[1].length
-			} catch (e) { }
-			r1 = Number(arg1.toString().replace(".", ""))
-			r2 = Number(arg2.toString().replace(".", ""))
-			return (r1 / r2) * Math.pow(10, t2 - t1)
-		},
-		/**
 		 * 简单的表单验证
 		 * @param {Object} formObj 表单对象
 		 * @param {Object} formRule 表单验证规则 {required : Boolean, validFunc : function(formObjItem, callFunc), message : String}
@@ -816,8 +674,9 @@ export default function () {
 		}
 	}
 
-	//显示等待模态框
+	//显示loading
 	function _showProgress(title, text, modal) {
+		// 打开的是系统loading
 		api.showProgress({
 			title: title,
 			text: text || '',
@@ -825,7 +684,7 @@ export default function () {
 		})
 	}
 
-	//关闭模态框
+	//关闭loading
 	function _hideProgress() {
 		api.hideProgress()
 	}
@@ -875,5 +734,4 @@ export default function () {
 	Vue.filter('setBaseUrl', Comm.setBaseUrl.bind(Comm))
 	Vue.filter('superZero', Comm.superZero)
 	Vue.filter('dateRemoveTime', Comm.dateRemoveTime)
-	Vue.filter('priceFormate', Comm.priceFormate.bind(Comm))
 }
