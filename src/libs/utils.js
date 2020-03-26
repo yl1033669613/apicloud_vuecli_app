@@ -1,3 +1,9 @@
+/**
+ * 作者: Zoran
+ * app storage 使用 api.setPrefs()
+ * 和可能用到的工具函数
+ */
+
 const storage = {
 	set(key, value) {
 		api.setPrefs({ key, value })
@@ -127,7 +133,7 @@ function priceFormate(price, hasW) {
 		return price
 	}
 	if (hasW) {
-		l = (parseInt(accMul(price, 10000)) + "").split("").reverse()
+		l = (parseInt(price, 10000) + "").split("").reverse()
 	} else {
 		let strArr = (parseFloat(price) + "").split(".")
 		l = strArr[0].split("").reverse()
@@ -139,4 +145,105 @@ function priceFormate(price, hasW) {
 	return t.split("").reverse().join("") + (d ? ("." + d) : "")
 }
 
-export { storage, accAdd, accSub, accMul, accDiv, priceFormate }
+// 日期去除时分秒
+function dateRemoveTime(date) {
+	if (date && date.length > 10) {
+		return date.substring(0, 10)
+	} else {
+		return date
+	}
+}
+
+// 个位数补零
+function superZero(num) {
+	return num < 10 ? ('0' + num) : num
+}
+
+// 验证手机
+function validPhone(val) {
+	const expPhone = /^1[3456789]\d{9}$/
+	if (!expPhone.test(val)) {
+		return false
+	} else {
+		return true
+	}
+}
+
+// 固定电话验证
+function validTele(val) {
+	const expTele = /^(\(\d{3,4}\)|\d{3,4}-|\s)?\d{7,14}$/
+	if (!expTele.test(val)) {
+		return false
+	} else {
+		return true
+	}
+}
+
+// 验证邮箱
+function validEmail(val) {
+	const expEmail = /^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$/
+	if (!expEmail.test(val)) {
+		return false
+	} else {
+		return true
+	}
+}
+
+//验证只包含数字
+function validNumber(val) {
+	const expNum = /^\d+$/
+	if (!expNum.test(val)) {
+		return false
+	} else {
+		return true
+	}
+}
+
+// 验证可能包含浮点的数字
+function isNumber(val) {
+	const regPos = /^\d+(\.\d+)?$/ //非负浮点数
+	const regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/ //负浮点数
+	if (regPos.test(val) || regNeg.test(val)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+// 验证身份证号 年限制在 1800 - 2199
+function isIdNum(val) {
+	var regID = /^[1-9]\d{5}(18|19|20|21)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
+	if (!regID.test(val)) {
+		return false
+	} else {
+		return true
+	}
+}
+
+// 验证只包含数字或字母
+function onlyNumOrLetters(val) {
+	const reg = /^[0-9a-zA-Z]+$/
+	if (!reg.test(val)) {
+		return false
+	} else {
+		return true
+	}
+}
+
+export {
+	storage, 
+	accAdd, 
+	accSub, 
+	accMul, 
+	accDiv, 
+	priceFormate, 
+	dateRemoveTime, 
+	superZero, 
+	validPhone,
+	validTele,
+	validEmail,
+	validNumber,
+	isNumber,
+	isIdNum,
+	onlyNumOrLetters
+}

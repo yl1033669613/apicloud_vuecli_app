@@ -1,9 +1,14 @@
+/**
+ * 作者: Zoran
+ * 公共js, 封装了一些重要的api接口, 和模块
+ * 以及对一些设备兼容的方法
+ */
+
 import Vue from 'vue'
 import FastClick from './fastclick.min'
-import { storage } from './utils'
-
-const BASE_API_URL = 'http://localhost:8080' //接口 base url
-const RESOURCE_URL = 'http://localhost:8080/resource' //资源 base url
+import { storage, superZero, dateRemoveTime } from './utils'
+import { toast, showProgress, hideProgress } from './base_ui'
+import Ajax from './ajax'
 
 // doc
 const winDoc = window.document
@@ -42,8 +47,20 @@ export default function () {
 	}
 
 	const Comm = {
-		baseApiUrl: BASE_API_URL,
-		resourceUrl: RESOURCE_URL,
+		baseApiUrl: Ajax.baseApiUrl,
+		resourceUrl: Ajax.resourceUrl,
+		// 判断是否为全路径 不是完整路径则拼前缀
+		setBaseUrl(url) {
+			if (url) {
+				if (url.match(/^(?:http|ftp|https):\/\//) || url.indexOf('../') > -1) {
+					return url
+				} else {
+					return this.resourceUrl + url
+				}
+			} else {
+				return ''
+			}
+		},
 		/**
 		 * 判断权限并发起授权请求 只有同意授权才会执行回调
 		 * @param {String || Array} perm 需要授权的权限名可以传字符串或数组
@@ -197,7 +214,7 @@ export default function () {
 					name: pageOpt.name
 				})
 			}
-			api.openWin({
+			api.openTabLayout({
 				name: pageOpt.name, //窗口页面
 				url: `widget://${headerName}.html`,
 				reload: true,
@@ -293,90 +310,67 @@ export default function () {
 			}
 		},
 		/**
-		 * 封装api.ajax
-		 * @param {Object} options ajax参数
+		 * 批量缓存图片
+		 * @param {Array} opt.datas 图片数组 支持传对象数组
+		 * @param {String} opt.imgKey 该字段为对象数组时指定图片对应的key
+		 * @param {String} opt.timeout 缓存图片超时时间
 		 */
-		ajax(options) {
+		fnImageCache(opt) {
 			const self = this
-			let _default = {
-				url: '',
-				method: 'post',
-				dataType: '',
-				timeout: 30,
-				headers: {
-					'Accept': 'application/json'
-				}
-			}
-			let _options = {}
-			_options = Object.assign(_options, _default, options)
-			if (!_options.url) {
-				api.alert({
-					msg: '数据地址不正确'
-				})
-				return false
-			}
-			if (_options.url.lastIndexOf('.json') > -1) {
-				_options.type = 'get'
-			}
-			if (!_options.url.match(/^(?:http|ftp|https):\/\//)) {
-				_options.url = self.baseApiUrl + _options.url
-			}
-			if (!_options.data) {
-				_options.data = {}
-			}
-			if (!_options.data.files && !_options.data.body) {
-				_options.headers = Object.assign(_options.headers, {
-					'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8'
-				})
-			}
-			let token = storage.get('token')
-			if (token && !_options.disableToken) {
-				_options.headers = Object.assign(_options.headers, {
-					'token': token
-				})
-			}
 			return new Promise((resolve, reject) => {
-				api.ajax({
-					url: _options.url,
-					data: _options.data,
-					method: _options.method,
-					dataType: _options.dataType,
-					headers: _options.headers,
-					timeout: _options.timeout
-				}, (ret, err) => {
-					if (ret) {
-						if (ret.code == 200) { //接口返回判断 成功 具体判断请依据具体接口返回处理
-							resolve(ret)
-						} else {
-							_hideProgress()
-							api.refreshHeaderLoadDone()
-							if (ret.code == 401) { //接口 授权判断  具体判断请依据具体接口返回处理
-								_toast('登录已过期，请重新登录')
-								//未授权则跳回首页并打开登录页
-								setTimeout(() => {
-									api.closeToWin({
-										name: 'root',
-										animation: {
-											type: 'none',
-											duration: 0
-										}
-									})
-									api.execScript({
-										name: 'root',
-										script: '$vm.openLoginWhenTokenInvalid()'
-									})
-								}, 700)
-								return reject({ errMsg: '登录已过期，请重新登录' })
-							}
-							reject(ret)
-						}
-					} else {
-						_hideProgress()
-						api.refreshHeaderLoadDone()
-						_toast('请求失败')
-						reject(err)
+				let currArr = opt.datas
+				let key = opt.imgKey
+				let count = 0
+				let timeout = opt.timeout || 30000
+				let loadDone = () => { // 缓存完成执行
+					if (count === currArr.length) {
+						resolve(currArr)
 					}
-				})
+				}
+				if (currArr && currArr.length) {
+					currArr.forEach((a, i) => {
+						let currUrl = ''
+						let itemType = typeof a
+						if (itemType === 'string') {
+							currUrl = self.setBaseUrl(a)
+						} else {
+							if (key) currUrl = self.setBaseUrl(a[key])
+						}
+						if (currUrl) {
+							// 缓存超时的情况 缓存超时为30000ms
+							let timer = setTimeout(() => {
+								clearTimeout(timer)
+								timer = null
+								count++
+								loadDone()
+							}, timeout)
+							api.imageCache({
+								url: currUrl,
+								thumbnail: false
+							}, (ret, err) => {
+								// 如果缓存超时则不执行缓存超时之后的回调
+								if (timer) {
+									clearTimeout(timer)
+									timer = null
+									if (ret.url) {
+										if (itemType === 'string') {
+											currArr[i] = ret.url
+										} else {
+											a[key] = ret.url
+										}
+									}
+									count++
+									loadDone()
+								}
+							})
+						} else {
+							count++
+							loadDone()
+						}
+					})
+				} else {
+					reject({ errMsg: '缓存图片为空', opt: opt })
+				}
 			})
 		},
 		// 上拉加载
@@ -476,94 +470,6 @@ export default function () {
 			return photoBrowser
 		},
 		/**
-		 * 批量缓存图片
-		 * @param {Array} opt.datas 图片数组 支持传对象数组
-		 * @param {String} opt.imgKey 该字段为对象数组时指定图片对应的key
-		 * @param {String} opt.timeout 缓存图片超时时间
-		 */
-		fnImageCache(opt) {
-			const self = this
-			return new Promise((resolve, reject) => {
-				let currArr = opt.datas
-				let key = opt.imgKey
-				let count = 0
-				let timeout = opt.timeout || 30000
-				let loadDone = () => { // 缓存完成执行
-					if (count === currArr.length) {
-						resolve(currArr)
-					}
-				}
-				if (currArr && currArr.length) {
-					currArr.forEach((a, i) => {
-						let currUrl = ''
-						let itemType = typeof a
-						if (itemType === 'string') {
-							currUrl = self.setBaseUrl(a)
-						} else {
-							if (key) currUrl = self.setBaseUrl(a[key])
-						}
-						if (currUrl) {
-							// 缓存超时的情况 缓存超时为30000ms
-							let timer = setTimeout(() => {
-								clearTimeout(timer)
-								timer = null
-								count++
-								loadDone()
-							}, timeout)
-							api.imageCache({
-								url: currUrl,
-								thumbnail: false
-							}, (ret, err) => {
-								// 如果缓存超时则不执行缓存超时之后的回调
-								if (timer) {
-									clearTimeout(timer)
-									timer = null
-									if (ret.url) {
-										if (itemType === 'string') {
-											currArr[i] = ret.url
-										} else {
-											a[key] = ret.url
-										}
-									}
-									count++
-									loadDone()
-								}
-							})
-						} else {
-							count++
-							loadDone()
-						}
-					})
-				} else {
-					reject({ errMsg: '缓存图片为空', opt: opt })
-				}
-			})
-		},
-		// 个位数补零
-		superZero(num) {
-			return num < 10 ? ('0' + num) : num
-		},
-		// 日期去除时分秒
-		dateRemoveTime(date) {
-			if (date && date.length > 10) {
-				return date.substring(0, 10)
-			} else {
-				return date
-			}
-		},
-		// 判断是否为全路径 不是完整路径则拼前缀
-		setBaseUrl(url) {
-			if (url) {
-				if (url.match(/^(?:http|ftp|https):\/\//) || url.indexOf('../') > -1) {
-					return url
-				} else {
-					return this.resourceUrl + url
-				}
-			} else {
-				return ''
-			}
-		},
-		/**
 		 * 简单的表单验证
 		 * @param {Object} formObj 表单对象
 		 * @param {Object} formRule 表单验证规则 {required : Boolean, validFunc : function(formObjItem, callFunc), message : String}
@@ -572,12 +478,12 @@ export default function () {
 			if (formObj && formRule) {
 				for (var key in formRule) {
 					if (formRule[key].required && !formObj[key]) {
-						_toast(formRule[key].message)
+						toast(formRule[key].message)
 						return false
 					}
 					if (formRule[key].validFunc) {
 						var validFuncRet = formRule[key].validFunc(formObj[key], function (msg) {
-							_toast(msg)
+							toast(msg)
 						})
 						if (!validFuncRet) return false
 					}
@@ -586,107 +492,7 @@ export default function () {
 			} else {
 				return false
 			}
-		},
-		// 验证手机
-		validPhone(val) {
-			const expPhone = /^1[3456789]\d{9}$/
-			if (!expPhone.test(val)) {
-				return false
-			} else {
-				return true
-			}
-		},
-		// 固定电话验证
-		validTele(val) {
-			const expTele = /^(\(\d{3,4}\)|\d{3,4}-|\s)?\d{7,14}$/
-			if (!expTele.test(val)) {
-				return false
-			} else {
-				return true
-			}
-		},
-		// 验证邮箱
-		validEmail(val) {
-			const expEmail = /^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$/
-			if (!expEmail.test(val)) {
-				return false
-			} else {
-				return true
-			}
-		},
-		//验证只包含数字
-		validNumber(val) {
-			const expNum = /^\d+$/
-			if (!expNum.test(val)) {
-				return false
-			} else {
-				return true
-			}
-		},
-		// 验证可能包含浮点的数字
-		isNumber(val) {
-			const regPos = /^\d+(\.\d+)?$/ //非负浮点数
-			const regNeg = /^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$/ //负浮点数
-			if (regPos.test(val) || regNeg.test(val)) {
-				return true;
-			} else {
-				return false;
-			}
-		},
-		// 验证身份证号 年限制在 1800 - 2199
-		isIdNum: function (val) {
-			var regID = /^[1-9]\d{5}(18|19|20|21)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/;
-			if (!regID.test(val)) {
-				return false
-			} else {
-				return true
-			}
-		},
-		// 验证只包含数字或字母
-		onlyNumOrLetters(val) {
-			const reg = /^[0-9a-zA-Z]+$/
-			if (!reg.test(val)) {
-				return false
-			} else {
-				return true
-			}
 		}
-	}
-
-	/**
-	 * toast
-	 * @param {String} msg
-	 * @param {Object} msg
-	 */
-	function _toast(msg) {
-		if (typeof msg === 'string') {
-			api.toast({
-				msg: msg,
-				duration: 3000,
-				location: 'bottom'
-			})
-		} else if (typeof msg === 'object') {
-			api.toast({
-				msg: msg.msg || '',
-				duration: msg.duration || 3000,
-				location: msg.location || 'bottom'
-			})
-		}
-	}
-
-	//显示loading
-	function _showProgress(title, text, modal) {
-		// 打开的是系统loading
-		api.showProgress({
-			title: title,
-			text: text || '',
-			modal: !!modal
-		})
-	}
-
-	//关闭loading
-	function _hideProgress() {
-		api.hideProgress()
 	}
 
 	// 初始化fastClick
@@ -712,26 +518,33 @@ export default function () {
 			// 沉浸式状态栏
 			_immersiveStatusBar()
 			// fastClick
-			_initFastClick()
+			// _initFastClick() // 2020-03 启用WKWebView, 可以不使用fastClick
 			callback && callback()
 		}
 	}
 
-	// 状态 UI 直接挂在vue上
-	Vue.prototype.toast = _toast
-	Vue.prototype.showProgress = _showProgress
-	Vue.prototype.hideProgress = _hideProgress
-
 	// 将comm 对象挂载在vue.js 上
 	Vue.prototype.$comm = Comm
+
+	// 状态 UI 直接挂在vue上
+	Vue.prototype.toast = toast
+	Vue.prototype.showProgress = showProgress
+	Vue.prototype.hideProgress = hideProgress
 
 	// storage
 	Vue.prototype.setStorage = storage.set
 	Vue.prototype.getStorage = storage.get
 	Vue.prototype.rmStorage = storage.del
 
+	// ajax 
+	Vue.prototype.ajax = Ajax.ajax
+
+	// 工具函数
+	Vue.prototype.superZero = superZero
+	Vue.prototype.dateRemoveTime = dateRemoveTime
+
 	// vue 过滤器
 	Vue.filter('setBaseUrl', Comm.setBaseUrl.bind(Comm))
-	Vue.filter('superZero', Comm.superZero)
-	Vue.filter('dateRemoveTime', Comm.dateRemoveTime)
+	Vue.filter('superZero', superZero)
+	Vue.filter('dateRemoveTime', dateRemoveTime)
 }

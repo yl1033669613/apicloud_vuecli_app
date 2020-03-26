@@ -12,6 +12,10 @@
 
 	<preference name="userAgent" value="APICloud" />
 
+	<preference name="useWKWebView" value="true" />
+	
+	<preference name="WKWebViewRecoveryMode" value="true" />
+
     <preference name="pageBounce" value="false"/>
 
 	<preference name="appBackground" value="rgba(0,0,0,0.0)"/>

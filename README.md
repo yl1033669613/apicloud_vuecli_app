@@ -11,9 +11,9 @@ window和frame以以多页面的形式编译最后生成`.html`文件
 
 更多页面调试方式，助力快速开发APICloud 应用
 
-common.js 封装了一些针对apicloud app的方法，包括ajax、图片缓存、窗口打开关闭、模块使用等(具体请参考example)
+common.js 封装了一些针对apicloud app的方法、图片缓存、窗口打开关闭、模块使用等(具体请参考example)
 
-项目初始包含登录逻辑，以及初始页面构成（普通页面， 特殊页面），节约开发时间
+项目初始包含登录逻辑，以及初始页面构成（普通页面， 特殊页面）
 
 ## 目录
 
@@ -58,7 +58,7 @@ apicloud、apicloud模块、vuejs 2.x、VueCLI 3.x、webPark 4、Babel、scss(cs
 
 5. `npm run serve` （运行项目前请确保全局安装了`@vue/cli`。如果没有请先 `npm install -g @vue/cli`）
 
-    可以在浏览器中调试（模块，app接口除外）
+    可以在浏览器中调试（模块，api接口除外）
 
     Local: `http://localhost:8080/your_pages.html`
 
@@ -79,6 +79,12 @@ apicloud、apicloud模块、vuejs 2.x、VueCLI 3.x、webPark 4、Babel、scss(cs
 8. 请为您的项目添加以下模块 UIPullRefreshFlash(必须)、UIActionSelector(非必须)、photoBrowser(非必须)
 
 9. app 必须包含根页面（`root`）作为初始页，默认`root`页为`index`，请在编程时确保`index`页存在，页面名字不可修改
+
+## WKWebView
+
+2020年4月后发布在ios平台上的应用必须使用WKWebView。因此模板默认全局启用WKWebView
+
+WKWebView使用介绍[https://community.apicloud.com/bbs/thread-151904-1-1.html](https://community.apicloud.com/bbs/thread-151904-1-1.html)
 
 ## css 预编译
 
