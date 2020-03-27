@@ -218,7 +218,7 @@ export default function () {
 				name: pageOpt.name, //窗口页面
 				url: `widget://${headerName}.html`,
 				reload: true,
-				slidBackEnabled: opt.slidBackEnabled || true,
+				slidBackEnabled: opt.slidBackEnabled || false,
 				slidBackType: opt.slidBackType || 'edge',
 				vScrollBarEnabled: opt.vScrollBarEnabled || false,
 				hScrollBarEnabled: opt.hScrollBarEnabled || false,
