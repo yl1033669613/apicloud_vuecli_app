@@ -7,7 +7,7 @@ Common() // 初始化公共库
 Vue.config.productionTip = false
 
 // 判断是否为 app 环境
-const isApp = window.navigator.userAgent.toLowerCase().indexOf('apicloud') !== -1 || window.navigator.userAgent.toLowerCase().indexOf('mobile') !== -1
+const isApp = window.navigator.userAgent.toLowerCase().indexOf('apicloud') !== -1
 let vm = null
 if (isApp) {
 	window.apiready = () => {
