@@ -1,6 +1,5 @@
 <template>
 <div class="container">
-    <div class="home-slider" ref="homeSlider"></div>
     <div class="home-content">
         <div class="btn-group line-spt-bott">
             <div class="area-row">

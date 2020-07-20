@@ -31,7 +31,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
 header {
     text-align: center;
     background: #748f5a;

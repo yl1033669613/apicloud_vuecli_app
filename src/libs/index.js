@@ -27,7 +27,7 @@ export default function () {
 
 	//时间格式化
 	Date.prototype.format = function (format) {
-		var o = {
+		let o = {
 			'M+': this.getMonth() + 1, //month
 			'd+': this.getDate(), //day
 			'h+': this.getHours(), //hour
@@ -38,7 +38,7 @@ export default function () {
 		}
 		if (/(y+)/.test(format)) format = format.replace(RegExp.$1,
 			(this.getFullYear() + '').substr(4 - RegExp.$1.length));
-		for (var k in o)
+		for (let k in o)
 			if (new RegExp('(' + k + ')').test(format))
 				format = format.replace(RegExp.$1,
 					RegExp.$1.length == 1 ? o[k] :
@@ -147,54 +147,6 @@ export default function () {
 			})
 		},
 		/**
-		 * 监听屏幕可显示范围变化导致布局变化 调整framegroup 和frame 布局, 该方法通常用于解决安卓键盘弹出时布局异常
-		 * @param {String} name frame frameGroup 名
-		 * @param {Number} type 打开frame 的类型 0 -> group 1 -> pop 2 -> normal frame
-		 */
-		resizeFrame(name, type) {
-			let rect = {
-				x: 0,
-				y: 0,
-				w: api.winWidth,
-				h: 0
-			}
-			window.addEventListener('resize', () => {
-				let headerH = 0, footerH = 0
-				let headerEle = winDoc.querySelector('header')
-				let footerEle = winDoc.querySelector('#footer')
-				if (headerEle) {
-					headerH = headerEle.offsetHeight
-				}
-				if (footerEle) {
-					footerH = footerEle.offsetHeight
-				}
-				switch (type) {
-					case 0:
-						rect.y = headerH
-						rect.h = api.winHeight - headerH - footerH
-						break
-					case 1:
-						rect.h = api.winHeight
-						break
-					case 2:
-						rect.y = headerH
-						rect.h = api.winHeight - headerH
-						break
-				}
-				if (type == 0) {
-					api.setFrameGroupAttr({
-						name: name,
-						rect: rect
-					})
-				} else {
-					api.setFrameAttr({
-						name: name,
-						rect: rect
-					})
-				}
-			})
-		},
-		/**
 		 * 打开新窗口
 		 * @param {Object} pageOpt 打开窗口的一些参数
 		 * @param {String} pageOpt.name 打开窗口主frame html文件名 实际窗口名
@@ -254,9 +206,13 @@ export default function () {
 				pageParam: pageParam,
 				rect: option.rect || {
 					x: 0,
-					y: y,
-					w: api.winWidth,
-					h: 'auto'
+					y: 0,
+					w: 'auto',
+					h: 'auto',
+					marginTop: y,
+					marginBottom: 0,
+					marginLeft: 0,
+					marginRight: 0
 				},
 				bgColor: option.bgColor || '#ffffff',
 				animation: option.animation || {
@@ -279,8 +235,12 @@ export default function () {
 			const rect = {
 				x: 0,
 				y: 0,
-				w: api.winWidth,
-				h: api.winHeight
+				w: 'auto',
+				h: 'auto',
+				marginTop: 0,
+				marginBottom: 0,
+				marginLeft: 0,
+				marginRight: 0
 			}
 			api.openFrame({
 				name: `${name}_POPWIN`,
@@ -293,7 +253,6 @@ export default function () {
 				},
 				reload: true
 			})
-			this.resizeFrame(name, 1)
 		},
 		/**
 		 * 操作系统返回时（需在window页面监听keyback事件），先检查是否有frame弹窗并关闭之后再关闭页面 请参考page_header.html

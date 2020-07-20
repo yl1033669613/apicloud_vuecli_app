@@ -150,13 +150,14 @@ export default {
             // 设置frameGroup位置
             let rect = {
                 x: 0,
-                y: self.$refs.header.offsetHeight,
-                w: api.winWidth,
-                h: api.winHeight -
-                    self.$refs.header.offsetHeight -
-                    self.$refs.footer.offsetHeight
+                y: 0,
+                w: 'auto',
+                h: 'auto',
+                marginTop: self.$refs.header.offsetHeight,
+                marginBottom: self.$refs.footer.offsetHeight,
+                marginLeft: 0,
+                marginRight: 0
             }
-            self.$comm.resizeFrame('group', 0) // 监听root页窗口变化，从而重新设置frameGroup的高度
             api.openFrameGroup({
                 name: 'group',
                 scrollEnabled: false,
@@ -188,11 +189,13 @@ export default {
                     name: 'group',
                     rect: {
                         x: 0,
-                        y: self.$refs.header.offsetHeight,
-                        w: api.winWidth,
-                        h: api.winHeight -
-                            self.$refs.header.offsetHeight -
-                            self.$refs.footer.offsetHeight
+                        y: 0,
+                        w: 'auto',
+                        h: 'auto',
+                        marginTop: self.$refs.header.offsetHeight,
+                        marginBottom: self.$refs.footer.offsetHeight,
+                        marginLeft: 0,
+                        marginRight: 0
                     }
                 })
             })
@@ -216,8 +219,12 @@ export default {
                 rect: {
                     x: 0,
                     y: 0,
-                    w: api.winWidth,
-                    h: api.winHeight
+                    w: 'auto',
+                    h: 'auto',
+                    marginTop: 0,
+                    marginBottom: 0,
+                    marginLeft: 0,
+                    marginRight: 0
                 },
                 animation: {
                     type: 'movein',

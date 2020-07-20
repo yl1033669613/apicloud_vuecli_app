@@ -37,8 +37,6 @@ export default {
         self.pageName = pageParam.pageName
         setTimeout(() => {
             self.$comm.openFrame(pageParam.pageName, pageParam)
-            // 窗口尺寸变化是调整frame布局
-            self.$comm.resizeFrame(pageParam.pageName + '_frame', 2)
         }, 0)
     },
     methods: {
