@@ -1,11 +1,12 @@
 {
-  "name": "apicloud_vuecli3_project",
+  "name": "apicloud_vuecli_project",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "wifi-start": "apicloud wifiStart --port 10915",
     "wifi-stop": "apicloud wifiStop --port 10915",
     "wifi-sync": "apicloud wifiSync --project ./dist --updateAll false --port 10915",
+    "wifi-sync-auto": "apicloud wifiSync --project ./dist --updateAll true --port 10915",
     "wifi-log": "apicloud wifiLog --port 10915",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build"
@@ -15,8 +16,8 @@
     "vue": "^2.6.10"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.1.0",
-    "@vue/cli-service": "^4.1.0",
+    "@vue/cli-plugin-babel": "^4.4.6",
+    "@vue/cli-service": "^4.4.6",
     "apicloud-cli": "^0.2.0",
     "node-sass": "^4.12.0",
     "on-build-webpack": "^0.1.0",

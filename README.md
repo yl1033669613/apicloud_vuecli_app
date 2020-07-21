@@ -3,11 +3,11 @@
 
 ## 简介
 
-APICloud+VueCLI3 完美结合的模块化开发框架，快速构建apicloud APP
+APICloud+VueCLI 结合的模块化开发框架，快速构建apicloud APP
 
 使用rem适配移动端各种设备
 
-window和frame以以多页面的形式编译最后生成`.html`文件
+window和frame以多页面的形式编译最后生成`.html`文件
 
 更多页面调试方式，助力快速开发APICloud 应用
 
@@ -44,7 +44,7 @@ common.js 封装了一些针对apicloud app的方法、图片缓存、窗口打�
 
 ## 技术栈
 
-apicloud、apicloud模块、vuejs 2.x、VueCLI 3.x、webPark 4、Babel、scss(css预编译)、nodejs、npm
+apicloud、apicloud模块、vuejs 2.x、VueCLI、webPark 4、Babel、scss(css预编译)、nodejs、npm
 
 ## 如何使用
 
@@ -104,11 +104,11 @@ WKWebView使用介绍[https://community.apicloud.com/bbs/thread-151904-1-1.html]
 
 ## ESlint
 
-本项目未安装ESlint如有需求请参考[VueCLI3插件](https://cli.vuejs.org/zh/guide/plugins-and-presets.html#%E6%8F%92%E4%BB%B6)
+本项目未安装ESlint如有需求请参考[VueCLI插件](https://cli.vuejs.org/zh/guide/plugins-and-presets.html#%E6%8F%92%E4%BB%B6)
 
 ## 框架编程需求
 
-需要开发者有一定apicloud、vue、vuecli开发经验。
+需要开发者有一定apicloud、vue开发经验。
 
 ## 最佳实践
 
