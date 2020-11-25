@@ -427,30 +427,6 @@ export default function () {
 				cb && cb(ret, photoBrowser)
 			})
 			return photoBrowser
-		},
-		/**
-		 * 简单的表单验证
-		 * @param {Object} formObj 表单对象
-		 * @param {Object} formRule 表单验证规则 {required : Boolean, validFunc : function(formObjItem, callFunc), message : String}
-		 */
-		validForm(formObj, formRule) {
-			if (formObj && formRule) {
-				for (var key in formRule) {
-					if (formRule[key].required && !formObj[key]) {
-						toast(formRule[key].message)
-						return false
-					}
-					if (formRule[key].validFunc) {
-						var validFuncRet = formRule[key].validFunc(formObj[key], function (msg) {
-							toast(msg)
-						})
-						if (!validFuncRet) return false
-					}
-				}
-				return true
-			} else {
-				return false
-			}
 		}
 	}
 
