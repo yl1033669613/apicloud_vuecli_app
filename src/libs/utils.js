@@ -6,7 +6,13 @@
 
 const storage = {
 	set(key, value) {
-		api.setPrefs({ key, value });
+		let val = null;
+		if (value && typeof value === 'object') {
+			val = JSON.stringify(value);
+		} else {
+			val = value;
+		}
+		api.setPrefs({ key: key, value: val });
 	},
 
 	get(key) {
@@ -167,6 +173,32 @@ function superZero(num) {
 	return num < 10 ? '0' + num : num;
 }
 
+//时间格式化
+function dateFormat(format, dt) {
+	const date = dt ? new Date(dt) : new Date();
+	const o = {
+		'M+': date.getMonth() + 1, //month
+		'd+': date.getDate(), //day
+		'h+': date.getHours(), //hour
+		'm+': date.getMinutes(), //minute
+		's+': date.getSeconds(), //second
+		'q+': Math.floor((date.getMonth() + 3) / 3), //quarter
+		S: date.getMilliseconds(), //millisecond
+	};
+	if (/(y+)/.test(format))
+		format = format.replace(
+			RegExp.$1,
+			(date.getFullYear() + '').substr(4 - RegExp.$1.length)
+		);
+	for (let k in o)
+		if (new RegExp('(' + k + ')').test(format))
+			format = format.replace(
+				RegExp.$1,
+				RegExp.$1.length == 1 ? o[k] : ('00' + o[k]).substr(('' + o[k]).length)
+			);
+	return format;
+}
+
 // 验证手机
 function validPhone(val) {
 	const expPhone = /^1[3456789]\d{9}$/;
@@ -247,6 +279,7 @@ export {
 	priceFormate,
 	dateRemoveTime,
 	superZero,
+	dateFormat,
 	validPhone,
 	validTele,
 	validEmail,

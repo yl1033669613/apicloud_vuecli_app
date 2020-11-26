@@ -66,6 +66,6 @@
 
 	<permission name="contact" />
 
-    <preference name="customRefreshHeader" value="UIPullRefreshFlash"/>
+  <preference name="customRefreshHeader" value="UIPullRefreshFlash"/>
 
 </widget>
